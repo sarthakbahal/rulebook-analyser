@@ -16,7 +16,7 @@
 | BM25 sparse retrieval | `rank_bm25.BM25Okapi` — full keyword-based ranking |
 | Dense vector retrieval | `sentence-transformers/all-MiniLM-L6-v2` (384-dim) + `qdrant-client` |
 | Reciprocal Rank Fusion | Custom RRF (k=60) merging BM25 + dense rankings |
-| LLM reasoning | Groq API (`llama-3.3-70b-versatile`) with structured JSON output |
+| LLM reasoning | Groq API (`openai/gpt-oss-120b`, configurable with `GROQ_MODEL`) with structured JSON output |
 | Schema validation | Pydantic v2 `StateOutput` model — enforces 3-state classification |
 | FastAPI backend | 4 REST endpoints (`/api/query`, `/api/eval`, `/api/docs/{source}`, `/api/test-set`) |
 | React dashboard | Vite + Tailwind dark theme, split-screen layout, eval modal |

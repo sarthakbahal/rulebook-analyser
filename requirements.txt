@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+qdrant-client
+groq
+pydantic
+rank-bm25
+PyMuPDF
+sentence-transformers
+joblib
+rich
+numpy
