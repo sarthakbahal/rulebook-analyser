@@ -1,0 +1,336 @@
+{
+  "description": "43-question benchmark for the derived academic/hostel/fee policy corpus. Includes answerable facts, near-miss unanswerables, and planted contradictions.",
+  "counts": {
+    "answerable": 15,
+    "near_miss": 25,
+    "contradiction": 3,
+    "total": 43
+  },
+  "questions": [
+    {
+      "id": "Q01",
+      "type": "answerable",
+      "question": "What is the Mind and Hand Book described as?",
+      "expected_answer": "It is the guide to MIT's expectations of student behavior as a student at MIT.",
+      "source": "academic_handbook.pdf",
+      "location": "Introduction / source page 2"
+    },
+    {
+      "id": "Q02",
+      "type": "answerable",
+      "question": "What does MIT's Latin motto 'Mens et Manus' mean?",
+      "expected_answer": "Mind and hand.",
+      "source": "academic_handbook.pdf",
+      "location": "Introduction / source page 6"
+    },
+    {
+      "id": "Q03",
+      "type": "answerable",
+      "question": "What are examples of academic misconduct identified in the handbook?",
+      "expected_answer": "Cheating, plagiarism, unauthorized collaboration, falsification, research misconduct, and other forms of academic misconduct are identified as serious offenses.",
+      "source": "academic_handbook.pdf",
+      "location": "Academic Integrity"
+    },
+    {
+      "id": "Q04",
+      "type": "answerable",
+      "question": "What is plagiarism?",
+      "expected_answer": "Plagiarism is the appropriation of another person's ideas, words, processes, results, assertions, data, or figures without giving appropriate credit or acknowledging the source.",
+      "source": "academic_handbook.pdf",
+      "location": "Academic Integrity - Plagiarism"
+    },
+    {
+      "id": "Q05",
+      "type": "answerable",
+      "question": "Who determines the collaboration policy for a class?",
+      "expected_answer": "Instructors determine the collaboration policy for each class.",
+      "source": "academic_handbook.pdf",
+      "location": "Academic Integrity - Unauthorized Collaboration"
+    },
+    {
+      "id": "Q06",
+      "type": "answerable",
+      "question": "What does the handbook define as research misconduct?",
+      "expected_answer": "Research misconduct is fabrication, falsification, or plagiarism in research activities or deliberate interference.",
+      "source": "academic_handbook.pdf",
+      "location": "Academic Integrity - Research Misconduct"
+    },
+    {
+      "id": "Q07",
+      "type": "answerable",
+      "question": "What is MIT's policy for alcohol possession or consumption by persons under 21?",
+      "expected_answer": "MIT prohibits any persons under the age of 21 from possessing or consuming alcohol.",
+      "source": "academic_handbook.pdf",
+      "location": "Alcohol Policy"
+    },
+    {
+      "id": "Q08",
+      "type": "answerable",
+      "question": "Is cannabis use permitted on MIT campus for students age 21 or older?",
+      "expected_answer": "No. MIT prohibits the use, sale, manufacturing, distribution, possession, or facilitation of cannabis on campus for all students, regardless of age.",
+      "source": "academic_handbook.pdf",
+      "location": "Other Drug Policy - Recreational Cannabis"
+    },
+    {
+      "id": "Q09",
+      "type": "answerable",
+      "question": "What number should be called from a campus phone for MIT Police in an emergency?",
+      "expected_answer": "Dial 100 from an MIT/campus phone.",
+      "source": "academic_handbook.pdf",
+      "location": "Emergency Contacts"
+    },
+    {
+      "id": "Q10",
+      "type": "answerable",
+      "question": "How many times can the Good Samaritan Amnesty Policy be used?",
+      "expected_answer": "There are no restrictions on the number of times it may be used.",
+      "source": "academic_handbook.pdf",
+      "location": "Good Samaritan Amnesty Policy"
+    },
+    {
+      "id": "Q11",
+      "type": "answerable",
+      "question": "Who should you contact immediately if a fellow student may be missing or in danger?",
+      "expected_answer": "MIT Police.",
+      "source": "academic_handbook.pdf",
+      "location": "Missing Person Procedure"
+    },
+    {
+      "id": "Q12",
+      "type": "answerable",
+      "question": "Where can students provide Missing Person Emergency Contact information?",
+      "expected_answer": "Through the Registrar's Office via WebSIS.",
+      "source": "academic_handbook.pdf",
+      "location": "Missing Student Notification Policy"
+    },
+    {
+      "id": "Q13",
+      "type": "answerable",
+      "question": "What are some reasons the handbook gives for taking student leave?",
+      "expected_answer": "Personal or medical issues interfering with academics, professional opportunities such as an internship, family or community commitments, or taking a break.",
+      "source": "academic_handbook.pdf",
+      "location": "Student Leave Policies"
+    },
+    {
+      "id": "Q14",
+      "type": "answerable",
+      "question": "What is the OSCCS email address?",
+      "expected_answer": "osccs@mit.edu",
+      "source": "academic_handbook.pdf",
+      "location": "Complaint, Reporting, and Disciplinary Procedures"
+    },
+    {
+      "id": "Q15",
+      "type": "answerable",
+      "question": "What is the library overdue fee in the synthetic fee schedule?",
+      "expected_answer": "$2 per day per item.",
+      "source": "fee_deadlines.md",
+      "location": "Table 1"
+    },
+    {
+      "id": "Q16",
+      "type": "near_miss",
+      "question": "What is the policy if I miss an exam because my sibling is getting married?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q17",
+      "type": "near_miss",
+      "question": "How many makeup exams are allowed after missing a final exam?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q18",
+      "type": "near_miss",
+      "question": "Can a student get an attendance exception for a routine doctor's appointment that is not hospitalization?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q19",
+      "type": "near_miss",
+      "question": "What is the deadline to appeal a course grade?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q20",
+      "type": "near_miss",
+      "question": "What is the fee for requesting an official transcript?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q21",
+      "type": "near_miss",
+      "question": "What is the policy for withdrawing from a course after the add/drop deadline?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q22",
+      "type": "near_miss",
+      "question": "How many overnight guests may a resident have in a semester?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q23",
+      "type": "near_miss",
+      "question": "What are the quiet hours for residence halls on weekends?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q24",
+      "type": "near_miss",
+      "question": "Can a resident request a room change because of a roommate conflict?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q25",
+      "type": "near_miss",
+      "question": "How much of the hostel deposit is refundable after normal wear and tear?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q26",
+      "type": "near_miss",
+      "question": "Are pets allowed in student rooms, and what deposit is required?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q27",
+      "type": "near_miss",
+      "question": "What are the library's opening and closing hours on Saturdays?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q28",
+      "type": "near_miss",
+      "question": "How long may a student borrow a laptop from the library?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q29",
+      "type": "near_miss",
+      "question": "What is the alumni library access policy after graduation?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q30",
+      "type": "near_miss",
+      "question": "Is there a special curfew exception for students whose parents are visiting?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q31",
+      "type": "near_miss",
+      "question": "How long can a guest stay overnight before they must be registered with housing?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q32",
+      "type": "near_miss",
+      "question": "Does an approved internship automatically earn academic credit?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q33",
+      "type": "near_miss",
+      "question": "What GPA is required to study abroad?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q34",
+      "type": "near_miss",
+      "question": "How are study-abroad courses converted into MIT credits?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q35",
+      "type": "near_miss",
+      "question": "What is the process for obtaining a parking permit for a private car?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q36",
+      "type": "near_miss",
+      "question": "Can students store bicycles inside their rooms during semester breaks?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q37",
+      "type": "near_miss",
+      "question": "What is the deadline to return a residence-hall key before move-out?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q38",
+      "type": "near_miss",
+      "question": "What mental-health documentation is required to receive extra exam time?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q39",
+      "type": "near_miss",
+      "question": "Can a student attend a final exam remotely while traveling outside the country?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q40",
+      "type": "near_miss",
+      "question": "What happens to a student's meal-plan balance when they graduate early?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q41",
+      "type": "contradiction",
+      "question": "What is the minimum attendance required if I am hospitalized?",
+      "expected_answer": "The corpus contains a contradiction: `academic_handbook.pdf` page 4 states a 75% minimum with no exceptions, while `hostel_rules.md` section 3.2 says hospitalization can waive 20% and allow eligibility at 55%.",
+      "target_locations": [
+        "academic_handbook.pdf Page 4",
+        "hostel_rules.md Section 3.2"
+      ]
+    },
+    {
+      "id": "Q42",
+      "type": "contradiction",
+      "question": "What penalty applies to a first late hostel entry after 10:00 PM?",
+      "expected_answer": "The corpus contains a contradiction: `hostel_rules.md` section 1.4 says late entry incurs an automated $50 fine, while section 5.1 says a first offense receives only a written warning and fines begin with the second offense.",
+      "target_locations": [
+        "hostel_rules.md Section 1.4",
+        "hostel_rules.md Section 5.1"
+      ]
+    },
+    {
+      "id": "Q43",
+      "type": "contradiction",
+      "question": "How long after graduation can I claim the library caution deposit refund?",
+      "expected_answer": "The corpus contains a contradiction: `fee_deadlines.md` Table 2 says within 30 days of graduation, while `academic_handbook.pdf` page 18 says claims remain valid for up to 1 year post-graduation.",
+      "target_locations": [
+        "fee_deadlines.md Table 2",
+        "academic_handbook.pdf Page 18"
+      ]
+    }
+  ]
+}
