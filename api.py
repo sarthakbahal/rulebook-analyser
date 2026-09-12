@@ -130,20 +130,23 @@ async def eval_endpoint(force: bool = False):
     Run the full 43-question benchmark and return accuracy metrics.
     This can take several minutes — do not time out your HTTP client.
     """
-    out_path = Path("eval_results.json")
-    if not force and out_path.exists():
-        with open(out_path, encoding="utf-8") as f:
-            return json.load(f)
-
-    if engine is None:
-        raise HTTPException(status_code=503, detail="Engine not yet initialised.")
-
     test_set_path = Path("test_set.json")
     if not test_set_path.exists():
         raise HTTPException(status_code=404, detail="test_set.json not found.")
 
     with open(test_set_path, encoding="utf-8") as f:
         test_data = json.load(f)
+
+    out_path = Path("eval_results.json")
+    if not force and out_path.exists():
+        with open(out_path, encoding="utf-8") as f:
+            cached = json.load(f)
+        cached_metrics = cached.get("metrics", {})
+        if cached_metrics.get("overall", {}).get("total") == len(test_data["questions"]):
+            return cached
+
+    if engine is None:
+        raise HTTPException(status_code=503, detail="Engine not yet initialised.")
 
     questions = test_data["questions"]
     counts = test_data["counts"]

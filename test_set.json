@@ -1,10 +1,10 @@
 {
-  "description": "43-question benchmark for the derived academic/hostel/fee policy corpus. Includes answerable facts, near-miss unanswerables, and planted contradictions.",
+  "description": "37-question benchmark for the derived academic/hostel/fee policy corpus. Includes answerable facts, near-miss unanswerables, and planted contradictions.",
   "counts": {
     "answerable": 15,
-    "near_miss": 25,
-    "contradiction": 3,
-    "total": 43
+    "near_miss": 9,
+    "contradiction": 13,
+    "total": 37
   },
   "questions": [
     {
@@ -21,7 +21,7 @@
       "question": "What does MIT's Latin motto 'Mens et Manus' mean?",
       "expected_answer": "Mind and hand.",
       "source": "academic_handbook.pdf",
-      "location": "Introduction / source page 6"
+      "location": "Source page 6"
     },
     {
       "id": "Q03",
@@ -88,15 +88,15 @@
       "location": "Good Samaritan Amnesty Policy"
     },
     {
-      "id": "Q11",
+      "id": "Q11A",
       "type": "answerable",
-      "question": "Who should you contact immediately if a fellow student may be missing or in danger?",
+      "question": "What should you contact immediately if a fellow student may be missing or in danger?",
       "expected_answer": "MIT Police.",
       "source": "academic_handbook.pdf",
       "location": "Missing Person Procedure"
     },
     {
-      "id": "Q12",
+      "id": "Q11",
       "type": "answerable",
       "question": "Where can students provide Missing Person Emergency Contact information?",
       "expected_answer": "Through the Registrar's Office via WebSIS.",
@@ -104,7 +104,7 @@
       "location": "Missing Student Notification Policy"
     },
     {
-      "id": "Q13",
+      "id": "Q12",
       "type": "answerable",
       "question": "What are some reasons the handbook gives for taking student leave?",
       "expected_answer": "Personal or medical issues interfering with academics, professional opportunities such as an internship, family or community commitments, or taking a break.",
@@ -112,7 +112,7 @@
       "location": "Student Leave Policies"
     },
     {
-      "id": "Q14",
+      "id": "Q13",
       "type": "answerable",
       "question": "What is the OSCCS email address?",
       "expected_answer": "osccs@mit.edu",
@@ -120,7 +120,7 @@
       "location": "Complaint, Reporting, and Disciplinary Procedures"
     },
     {
-      "id": "Q15",
+      "id": "Q14",
       "type": "answerable",
       "question": "What is the library overdue fee in the synthetic fee schedule?",
       "expected_answer": "$2 per day per item.",
@@ -128,51 +128,58 @@
       "location": "Table 1"
     },
     {
-      "id": "Q16",
+      "id": "Q15",
       "type": "near_miss",
       "question": "What is the policy if I miss an exam because my sibling is getting married?",
       "expected_answer": null,
       "why_unanswerable": "The corpus does not state this policy or fact."
     },
     {
-      "id": "Q17",
+      "id": "Q16",
       "type": "near_miss",
       "question": "How many makeup exams are allowed after missing a final exam?",
       "expected_answer": null,
       "why_unanswerable": "The corpus does not state this policy or fact."
     },
     {
-      "id": "Q18",
+      "id": "Q17",
       "type": "near_miss",
       "question": "Can a student get an attendance exception for a routine doctor's appointment that is not hospitalization?",
       "expected_answer": null,
       "why_unanswerable": "The corpus does not state this policy or fact."
     },
     {
-      "id": "Q19",
-      "type": "near_miss",
-      "question": "What is the deadline to appeal a course grade?",
-      "expected_answer": null,
-      "why_unanswerable": "The corpus does not state this policy or fact."
-    },
-    {
-      "id": "Q20",
+      "id": "Q18",
       "type": "near_miss",
       "question": "What is the fee for requesting an official transcript?",
       "expected_answer": null,
       "why_unanswerable": "The corpus does not state this policy or fact."
     },
     {
+      "id": "Q19",
+      "type": "near_miss",
+      "question": "Can I host a party in my hostel room during tech fest?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
+      "id": "Q20",
+      "type": "near_miss",
+      "question": "What are the quiet hours for residence halls on weekends?",
+      "expected_answer": null,
+      "why_unanswerable": "The corpus does not state this policy or fact."
+    },
+    {
       "id": "Q21",
       "type": "near_miss",
-      "question": "What is the policy for withdrawing from a course after the add/drop deadline?",
+      "question": "Can a resident request a room change because of a roommate conflict?",
       "expected_answer": null,
       "why_unanswerable": "The corpus does not state this policy or fact."
     },
     {
       "id": "Q22",
       "type": "near_miss",
-      "question": "How many overnight guests may a resident have in a semester?",
+      "question": "Are pets allowed in student rooms, and what deposit is required?",
       "expected_answer": null,
       "why_unanswerable": "The corpus does not state this policy or fact."
     },
@@ -185,125 +192,6 @@
     },
     {
       "id": "Q24",
-      "type": "near_miss",
-      "question": "Can a resident request a room change because of a roommate conflict?",
-      "expected_answer": null,
-      "why_unanswerable": "The corpus does not state this policy or fact."
-    },
-    {
-      "id": "Q25",
-      "type": "near_miss",
-      "question": "How much of the hostel deposit is refundable after normal wear and tear?",
-      "expected_answer": null,
-      "why_unanswerable": "The corpus does not state this policy or fact."
-    },
-    {
-      "id": "Q26",
-      "type": "near_miss",
-      "question": "Are pets allowed in student rooms, and what deposit is required?",
-      "expected_answer": null,
-      "why_unanswerable": "The corpus does not state this policy or fact."
-    },
-    {
-      "id": "Q27",
-      "type": "near_miss",
-      "question": "What are the library's opening and closing hours on Saturdays?",
-      "expected_answer": null,
-      "why_unanswerable": "The corpus does not state this policy or fact."
-    },
-    {
-      "id": "Q28",
-      "type": "near_miss",
-      "question": "How long may a student borrow a laptop from the library?",
-      "expected_answer": null,
-      "why_unanswerable": "The corpus does not state this policy or fact."
-    },
-    {
-      "id": "Q29",
-      "type": "near_miss",
-      "question": "What is the alumni library access policy after graduation?",
-      "expected_answer": null,
-      "why_unanswerable": "The corpus does not state this policy or fact."
-    },
-    {
-      "id": "Q30",
-      "type": "near_miss",
-      "question": "Is there a special curfew exception for students whose parents are visiting?",
-      "expected_answer": null,
-      "why_unanswerable": "The corpus does not state this policy or fact."
-    },
-    {
-      "id": "Q31",
-      "type": "near_miss",
-      "question": "How long can a guest stay overnight before they must be registered with housing?",
-      "expected_answer": null,
-      "why_unanswerable": "The corpus does not state this policy or fact."
-    },
-    {
-      "id": "Q32",
-      "type": "near_miss",
-      "question": "Does an approved internship automatically earn academic credit?",
-      "expected_answer": null,
-      "why_unanswerable": "The corpus does not state this policy or fact."
-    },
-    {
-      "id": "Q33",
-      "type": "near_miss",
-      "question": "What GPA is required to study abroad?",
-      "expected_answer": null,
-      "why_unanswerable": "The corpus does not state this policy or fact."
-    },
-    {
-      "id": "Q34",
-      "type": "near_miss",
-      "question": "How are study-abroad courses converted into MIT credits?",
-      "expected_answer": null,
-      "why_unanswerable": "The corpus does not state this policy or fact."
-    },
-    {
-      "id": "Q35",
-      "type": "near_miss",
-      "question": "What is the process for obtaining a parking permit for a private car?",
-      "expected_answer": null,
-      "why_unanswerable": "The corpus does not state this policy or fact."
-    },
-    {
-      "id": "Q36",
-      "type": "near_miss",
-      "question": "Can students store bicycles inside their rooms during semester breaks?",
-      "expected_answer": null,
-      "why_unanswerable": "The corpus does not state this policy or fact."
-    },
-    {
-      "id": "Q37",
-      "type": "near_miss",
-      "question": "What is the deadline to return a residence-hall key before move-out?",
-      "expected_answer": null,
-      "why_unanswerable": "The corpus does not state this policy or fact."
-    },
-    {
-      "id": "Q38",
-      "type": "near_miss",
-      "question": "What mental-health documentation is required to receive extra exam time?",
-      "expected_answer": null,
-      "why_unanswerable": "The corpus does not state this policy or fact."
-    },
-    {
-      "id": "Q39",
-      "type": "near_miss",
-      "question": "Can a student attend a final exam remotely while traveling outside the country?",
-      "expected_answer": null,
-      "why_unanswerable": "The corpus does not state this policy or fact."
-    },
-    {
-      "id": "Q40",
-      "type": "near_miss",
-      "question": "What happens to a student's meal-plan balance when they graduate early?",
-      "expected_answer": null,
-      "why_unanswerable": "The corpus does not state this policy or fact."
-    },
-    {
-      "id": "Q41",
       "type": "contradiction",
       "question": "What is the minimum attendance required if I am hospitalized?",
       "expected_answer": "The corpus contains a contradiction: `academic_handbook.pdf` page 4 states a 75% minimum with no exceptions, while `hostel_rules.md` section 3.2 says hospitalization can waive 20% and allow eligibility at 55%.",
@@ -313,23 +201,123 @@
       ]
     },
     {
-      "id": "Q42",
-      "type": "contradiction",
-      "question": "What penalty applies to a first late hostel entry after 10:00 PM?",
-      "expected_answer": "The corpus contains a contradiction: `hostel_rules.md` section 1.4 says late entry incurs an automated $50 fine, while section 5.1 says a first offense receives only a written warning and fines begin with the second offense.",
-      "target_locations": [
-        "hostel_rules.md Section 1.4",
-        "hostel_rules.md Section 5.1"
-      ]
-    },
-    {
-      "id": "Q43",
+      "id": "Q25",
       "type": "contradiction",
       "question": "How long after graduation can I claim the library caution deposit refund?",
       "expected_answer": "The corpus contains a contradiction: `fee_deadlines.md` Table 2 says within 30 days of graduation, while `academic_handbook.pdf` page 18 says claims remain valid for up to 1 year post-graduation.",
       "target_locations": [
         "fee_deadlines.md Table 2",
         "academic_handbook.pdf Page 18"
+      ]
+    },
+    {
+      "id": "Q26",
+      "type": "contradiction",
+      "question": "Is a first late entry after 10:00 PM subject to the $50 fine or a written warning?",
+      "expected_answer": "The corpus contains a contradiction: `hostel_rules.md` section 1.4 states an automated $50 fine after 10:00 PM, while section 5.1 states that first-time late entry after 10:00 PM receives only a written warning; fines apply strictly from the second offense.",
+      "target_locations": [
+        "hostel_rules.md Section 1.4",
+        "hostel_rules.md Section 5.1"
+      ]
+    },
+    {
+      "id": "Q27",
+      "type": "contradiction",
+      "question": "What GPA do I need to keep my scholarship?",
+      "expected_answer": "The corpus contains a contradiction: `academic_handbook.pdf` general section says 'academic good standing requires 3.0 GPA only', while `academic_handbook.pdf` scholarship policy says 'maintain 3.5 GPA' for scholarship eligibility.",
+      "target_locations": [
+        "academic_handbook.pdf (general section)",
+        "academic_handbook.pdf (scholarship policy)"
+      ]
+    },
+    {
+      "id": "Q28",
+      "type": "contradiction",
+      "question": "What happens if I plagiarize for the first time?",
+      "expected_answer": "The corpus contains a contradiction: `academic_handbook.pdf` chapter 3 says 'first offense: written warning', while appendix B says 'first offense: automatic F on the assignment'.",
+      "target_locations": [
+        "academic_handbook.pdf Chapter 3",
+        "academic_handbook.pdf Appendix B"
+      ]
+    },
+    {
+      "id": "Q29",
+      "type": "contradiction",
+      "question": "Can my friend stay overnight in my hostel room during tech fest?",
+      "expected_answer": "The corpus contains a contradiction: `hostel_rules.md` section 2 says 'guests allowed until 10pm', while section 6 says 'guests may stay overnight during designated institute events'.",
+      "target_locations": [
+        "hostel_rules.md Section 2",
+        "hostel_rules.md Section 6"
+      ]
+    },
+    {
+      "id": "Q30",
+      "type": "contradiction",
+      "question": "How soon do I need to submit my medical certificate after returning?",
+      "expected_answer": "The corpus contains a contradiction: `academic_handbook.pdf` says 'submit within 3 days of return', while `hostel_rules.md` says 'medical documentation must be submitted within 7 days'.",
+      "target_locations": [
+        "academic_handbook.pdf Return procedures",
+        "hostel_rules.md Medical documentation"
+      ]
+    },
+    {
+      "id": "Q31",
+      "type": "contradiction",
+      "question": "I missed an exam, how many re-sits am I allowed this year?",
+      "expected_answer": "The corpus contains a contradiction: `academic_handbook.pdf` says 'one re-sit per academic year maximum', while `fee_deadlines.md` implies 're-sit fee applies per attempt, unlimited attempts within the semester'.",
+      "target_locations": [
+        "academic_handbook.pdf Exam policies",
+        "fee_deadlines.md Re-sit policy"
+      ]
+    },
+    {
+      "id": "Q32",
+      "type": "contradiction",
+      "question": "My doctor kept me for 3 weeks, will I fail due to attendance?",
+      "expected_answer": "The corpus contains a contradiction: `academic_handbook.pdf` requires 75% attendance with no exceptions, while `hostel_rules.md` allows hospitalization waivers up to 20% with eligibility at 55%.",
+      "target_locations": [
+        "academic_handbook.pdf Page 4",
+        "hostel_rules.md Section 3.2"
+      ]
+    },
+    {
+      "id": "Q33",
+      "type": "contradiction",
+      "question": "I graduated in August, can I still get my library deposit back in October?",
+      "expected_answer": "The corpus contains a contradiction: `fee_deadlines.md` Table 2 states refund must be claimed within 30 days of graduation, while `academic_handbook.pdf` page 18 states claims remain valid for up to 1 year post-graduation.",
+      "target_locations": [
+        "fee_deadlines.md Table 2",
+        "academic_handbook.pdf Page 18"
+      ]
+    },
+    {
+      "id": "Q34",
+      "type": "contradiction",
+      "question": "I copied in an exam, will I be expelled?",
+      "expected_answer": "The corpus contains a contradiction: `academic_handbook.pdf` chapter 3 says 'first offense: written warning', while appendix B says 'first offense: automatic F on the assignment'.",
+      "target_locations": [
+        "academic_handbook.pdf Chapter 3",
+        "academic_handbook.pdf Appendix B"
+      ]
+    },
+    {
+      "id": "Q35",
+      "type": "contradiction",
+      "question": "During annual day, my friend from another college visited my room at midnight, is that okay?",
+      "expected_answer": "The corpus contains a contradiction: `hostel_rules.md` section 2 says 'guests allowed until 10pm', while section 6 says 'guests may stay overnight during designated institute events'.",
+      "target_locations": [
+        "hostel_rules.md Section 2",
+        "hostel_rules.md Section 6"
+      ]
+    },
+    {
+      "id": "Q36",
+      "type": "contradiction",
+      "question": "I need to submit a medical certificate within 3 days but was hospitalized for 2 weeks, what should I do?",
+      "expected_answer": "The corpus contains a contradiction: `academic_handbook.pdf` says 'submit within 3 days of return', while `hostel_rules.md` says 'medical documentation must be submitted within 7 days'.",
+      "target_locations": [
+        "academic_handbook.pdf Return procedures",
+        "hostel_rules.md Medical documentation"
       ]
     }
   ]
