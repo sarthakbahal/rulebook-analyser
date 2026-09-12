@@ -1,6 +1,6 @@
 # Rulebook Engine
 
-> Academic Regulation Decision Engine — a deterministic 3-state reasoning system that ingests a synthetic MIT regulation corpus, retrieves relevant passages via hybrid search, and classifies queries as **answerable**, **unanswerable**, or **contradiction**.
+> Academic Regulation Decision Engine — a deterministic 3-state reasoning system that ingests a synthetic MIT regulation corpus, retrieves relevant passages via hybrid search (BM25 + Qdrant with RRF fusion), and classifies queries as **answerable**, **near_miss** (unanswerable), or **contradiction** with detailed conflict reporting.
 
 ---
 
@@ -10,17 +10,17 @@
 
 | Component | Status |
 |---|---|
-| PDF parsing | `pypdf` extracts all 20 pages from `academic_handbook.pdf` |
+| PDF parsing | `pypdf` extracts all pages from `academic_handbook.pdf` |
 | Markdown parsing | Custom parser splits `hostel_rules.md` and `fee_deadlines.md` by `## ` headings |
 | Document chunking | `RecursiveCharacterTextSplitter` — 500 chars, 100 overlap, page/section metadata |
 | BM25 sparse retrieval | `rank_bm25.BM25Okapi` — full keyword-based ranking |
 | Dense vector retrieval | `sentence-transformers/all-MiniLM-L6-v2` (384-dim) + `qdrant-client` |
 | Reciprocal Rank Fusion | Custom RRF (k=60) merging BM25 + dense rankings |
-| LLM reasoning | Groq API (`openai/gpt-oss-120b`, configurable with `GROQ_MODEL`) with structured JSON output |
+| LLM reasoning | Groq API (`llama-3.3-70b-versatile` or configurable) with structured JSON output |
 | Schema validation | Pydantic v2 `StateOutput` model — enforces 3-state classification |
 | FastAPI backend | 4 REST endpoints (`/api/query`, `/api/eval`, `/api/docs/{source}`, `/api/test-set`) |
 | React dashboard | Vite + Tailwind dark theme, split-screen layout, eval modal |
-| Benchmark evaluation | 43-question automated runner with per-question accuracy metrics |
+| Benchmark evaluation | Automated runner with per-question accuracy metrics |
 | Citation system | Verbatim quotes with source file + page/section location |
 
 ### Mocked / Synthetic
@@ -28,9 +28,9 @@
 | Component | Details |
 |---|---|
 | **Corpus** | All 3 document files (`academic_handbook.pdf`, `hostel_rules.md`, `fee_deadlines.md`) are **synthetic** — derived from MIT's Mind and Hand Book but modified with deliberately planted contradictions. Not official MIT policy. |
-| **Contradictions** | The 3 contradictions (attendance rules, library refund deadline, hostel late-entry fines) are **intentionally planted** for testing contradiction detection. They are documented in `contradictions.md`. |
+| **Contradictions** | The 10 contradictions (attendance, library refund, late entry fine, exam re-sit, scholarship GPA, plagiarism first offense, hostel guest policy, medical certificate deadline) are **intentionally planted** for testing contradiction detection. They are documented implicitly in the source files and explicitly in `contradictions.md`. |
 | **Fee schedule** | All dollar amounts in `fee_deadlines.md` are **fabricated** (tuition $31,250, hostel $8,400, etc.). The real MIT handbook does not contain these numbers. |
-| **Test set** | `test_set.json` is a **synthetic benchmark** — 43 hand-crafted questions designed to test all 3 states. Not derived from real student queries. |
+| **Test set** | `test_set.json` is a **synthetic benchmark** — 25 hand-crafted questions designed to test all 3 states. Not derived from real student queries. |
 | **LLM provider** | Uses Groq's free tier — subject to rate limits. In production, swap to a paid plan or different provider. |
 | **Embeddings** | `all-MiniLM-L6-v2` runs locally on CPU — adequate for ~50 chunks but not for production-scale corpora. |
 
@@ -48,7 +48,7 @@ user query ───────────────────────
                                     ┌───────────┼───────────┐
                                     ▼           ▼           ▼
                                 eval.py     api.py      React UI
-                              (43 Q benchmark)  (FastAPI)  (Vite + Tailwind)
+                              (25 Q benchmark)  (FastAPI)  (Vite + Tailwind)
 ```
 
 ---
@@ -108,7 +108,7 @@ This parses all 3 documents, chunks them, builds BM25 + Qdrant indices, and save
 python eval.py
 ```
 
-Runs all 43 questions from `test_set.json` against the engine and prints accuracy metrics to the terminal.
+Runs all 25 questions from `test_set.json` against the engine and prints accuracy metrics to the terminal.
 
 ### 6. Start the API server
 
@@ -166,7 +166,7 @@ print(result.citations)   # List of Citation objects
 | Method | Path | Description |
 |---|---|---|
 | `POST` | `/api/query` | Send a question, get 3-state classification |
-| `GET` | `/api/eval` | Run full 43-question benchmark |
+| `GET` | `/api/eval` | Run full 25-question benchmark |
 | `GET` | `/api/docs/{source}` | Get raw text of a source document |
 | `GET` | `/api/test-set` | Get the test_set.json content |
 
@@ -184,17 +184,20 @@ Response:
 {
   "state": "answerable",
   "confidence_score": 0.95,
-  "answer": "Plagiarism is the appropriation of another person's ideas...",
+  "answer": "Plagiarism is the appropriation of another person's ideas, words, processes, results, assertions, data, or figures without giving appropriate credit or acknowledging the source.",
   "citations": [
     {
       "source": "academic_handbook.pdf",
       "location": "Page 6",
-      "quote": "Plagiarism is the appropriation of..."
+      "quote": "Plagiarism is the appropriation of another person's ideas, words, processes, results, assertions, data, or figures without giving appropriate credit or acknowledging that one has done so."
     }
   ],
+  "contradiction_detail": null,
   "contradiction_explanation": null
 }
 ```
+
+For contradiction queries, the response will include a populated `contradiction_detail` object with `passage_a`, `source_a`, `location_a`, `passage_b`, `source_b`, `location_b`, and `conflict_explanation`.
 
 ---
 
@@ -202,11 +205,11 @@ Response:
 
 ```
 itg/
-├── academic_handbook.pdf       # 20-page synthetic MIT handbook
-├── hostel_rules.md             # Synthetic hostel rules (6 sections)
-├── fee_deadlines.md            # Synthetic fee schedule (2 tables)
-├── contradictions.md           # Documents the 3 planted contradictions
-├── test_set.json               # 43-question benchmark (15 answerable, 25 near_miss, 3 contradiction)
+├── academic_handbook.pdf       # Synthetic MIT handbook (with 10 planted contradictions)
+├── hostel_rules.md             # Synthetic hostel rules (with contradictions)
+├── fee_deadlines.md            # Synthetic fee schedule (with contradictions)
+├── contradictions.md           # Documents the planted contradictions
+├── test_set.json               # 25-question benchmark (10 answerable, 5 near_miss, 10 contradiction)
 │
 ├── .env                        # API keys (not committed)
 ├── .gitignore                  # Ignores .env, __pycache__, node_modules, index_data/
@@ -248,13 +251,22 @@ itg/
 
 ---
 
-## The 3 Planted Contradictions
+## The 10 Planted Contradictions
 
 | # | Topic | Source A | Source B |
 |---|---|---|---|
 | 1 | **Attendance rule** | `academic_handbook.pdf` Page 4: "75% minimum, no exceptions" | `hostel_rules.md` Section 3.2: "Hospitalization waives 20%, eligibility at 55%" |
-| 2 | **Hostel late-entry penalty** | `hostel_rules.md` Section 1.4: "$50 fine for any late entry" | `hostel_rules.md` Section 5.1: "First offense = warning only, fines from 2nd" |
-| 3 | **Library refund deadline** | `fee_deadlines.md` Table 2: "Within 30 days of graduation" | `academic_handbook.pdf` Page 18: "Valid for up to 1 year post-graduation" |
+| 2 | **Library refund deadline** | `fee_deadlines.md` Table 2: "Within 30 days of graduation" | `academic_handbook.pdf` Page 18: "Valid for up to 1 year post-graduation" |
+| 3 | **Hostel late-entry penalty** | `hostel_rules.md` Section 1.4: "$50 fine for any late entry" | `hostel_rules.md` Section 5.1: "First offense = warning only, fines from 2nd" |
+| 4 | **Exam re-sit policy** | `academic_handbook.pdf` (exam policies): "One re-sit per academic year maximum" | `fee_deadlines.md` (re-sit policy): "Re-sit fee applies per attempt, unlimited attempts within the semester" |
+| 5 | **Scholarship GPA** | `academic_handbook.pdf` (general section): "Academic good standing requires 3.0 GPA only" | `academic_handbook.pdf` (scholarship policy): "Maintain 3.5 GPA for scholarship eligibility" |
+| 6 | **Plagiarism first offense** | `academic_handbook.pdf` Chapter 3: "First offense: written warning" | `academic_handbook.pdf` Appendix B: "First offense: automatic F on the assignment" |
+| 7 | **Hostel guest policy** | `hostel_rules.md` Section 2: "Guests allowed until 10pm" | `hostel_rules.md` Section 6 (festival/events): "Guests may stay overnight during designated institute events" |
+| 8 | **Medical certificate deadline** | `academic_handbook.pdf` (return procedures): "Submit within 3 days of return" | `hostel_rules.md` (medical documentation): "Must be submitted within 7 days" |
+| 9 | **(Duplicate test of #1)** | Same as #1 | Same as #1 |
+| 10| **(Duplicate test of #2)** | Same as #2 | Same as #2 |
+
+*Note: Contradictions #9 and #10 are indirect/roundabout questions that test the same underlying conflicts as #1 and #2 but phrased as real-world student scenarios.*
 
 ---
 
@@ -305,3 +317,7 @@ Push the Python files. Set environment variables in the dashboard:
 | React shows "Failed to fetch" | Ensure FastAPI is running on port 8000 |
 | Qdrant connection error | Either omit `QDRANT_URL` for local mode, or check your Qdrant Cloud credentials |
 | Benchmark accuracy is low | Rebuild index: delete `index_data/` and run `python ingest.py` again |
+| LLM returns JSON schema error | Ensure you're using the latest `engine.py` with fixed `ContradictionDetail` schema |
+| UI not showing contradiction details | Check that `ResponseDisplay.jsx` uses `location_a`/`location_b` from `contradiction_detail` |
+
+---
