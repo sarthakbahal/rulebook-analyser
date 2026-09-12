@@ -22,7 +22,7 @@ export default function Header({ onOpenEval }) {
       <div className="flex items-center gap-3">
         <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-500">
           <Activity className="w-3.5 h-3.5 text-accent-green" />
-          <span>3-state classifier · Groq LLaMA-3.3-70B</span>
+          <span>3-state classifier</span>
         </div>
         <button
           id="run-eval-btn"
