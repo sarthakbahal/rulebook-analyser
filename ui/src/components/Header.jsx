@@ -31,7 +31,7 @@ export default function Header({ onOpenEval }) {
         >
           <PlayCircle className="w-3.5 h-3.5" />
           Run Eval Benchmark
-          <span className="hidden md:inline ml-1 opacity-60">(43 queries)</span>
+          <span className="hidden md:inline ml-1 opacity-60">(25 queries)</span>
         </button>
       </div>
     </header>

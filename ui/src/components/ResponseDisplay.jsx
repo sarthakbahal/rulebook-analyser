@@ -30,7 +30,9 @@ export default function ResponseDisplay({ response, onCitationClick }) {
       <div className="rounded-xl border-l-4 border-accent-grey bg-surface-200 p-5">
         <StateBadge state={state} />
         <div className="mt-3 bg-accent-amber/10 border border-accent-amber/30 rounded-lg p-4">
-          <p className="text-sm text-accent-amber leading-relaxed">{answer}</p>
+          <p className="text-sm text-accent-amber leading-relaxed">
+            {answer || 'The corpus has no answer for this question.'}
+          </p>
         </div>
       </div>
     );

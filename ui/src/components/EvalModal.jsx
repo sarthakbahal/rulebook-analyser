@@ -36,7 +36,7 @@ export default function EvalModal({ onClose }) {
             </div>
             <div>
               <h2 className="text-base font-semibold text-white">Evaluation Benchmark</h2>
-              <p className="text-[11px] text-slate-500">43-question test set · 3-state classification</p>
+              <p className="text-[11px] text-slate-500">25-question test set · 3-state classification</p>
             </div>
           </div>
           <button
@@ -54,7 +54,7 @@ export default function EvalModal({ onClose }) {
             <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
               <Loader2 className="w-10 h-10 text-accent-blue animate-spin" />
               <div>
-                <p className="text-white font-medium">Running 43-question benchmark…</p>
+                <p className="text-white font-medium">Running 25-question benchmark…</p>
                 <p className="text-slate-500 text-sm mt-1">
                   This may take a few minutes. Elapsed: <span className="text-accent-blue font-mono">{fmtTime(elapsed)}</span>
                 </p>
