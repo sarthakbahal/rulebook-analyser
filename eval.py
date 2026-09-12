@@ -102,7 +102,7 @@ def run_evaluation(
                 }
             )
             progress.advance(task)
-            time.sleep(0.1)  # light throttle for Groq free tier
+            time.sleep(2.0)  # keep the request rate below Groq TPM limits
 
     # ── Print results table ────────────────────────────────────────
     table = Table(

@@ -31,15 +31,17 @@ class Citation(BaseModel):
 
 class ContradictionDetail(BaseModel):
     passage_a: str = Field(description="verbatim quote from first conflicting source")
-    source_a: str = Field(description="file and location of first passage")
+    source_a: str = Field(description="file name of first passage, e.g., academic_handbook.pdf")
+    location_a: str = Field(description="location within source, e.g., Page 4 or Section 3.2")
     passage_b: str = Field(description="verbatim quote from second conflicting source")
-    source_b: str = Field(description="file and location of second passage")
+    source_b: str = Field(description="file name of second passage, e.g., academic_handbook.pdf")
+    location_b: str = Field(description="location within source, e.g., Page 18 or Section 1.4")
     conflict_explanation: str = Field(description="one-sentence explanation why following both is impossible")
 
 class StateOutput(BaseModel):
     state: Literal["answerable", "near_miss", "contradiction"]
     confidence_score: float = Field(description="Confidence between 0.0 and 1.0")
-    answer: Optional[str] = Field(description="Direct answer or explicit refusal")
+    answer: Optional[str] = Field(default=None, description="Direct answer or explicit refusal")
     citations: List[Citation] = Field(default_factory=list)
     contradiction_detail: Optional[ContradictionDetail] = Field(default=None, description="Detailed conflict information")
     contradiction_explanation: Optional[str] = Field(default=None, description="Extended explanation of the contradiction")
@@ -60,21 +62,94 @@ def groq_state_schema() -> dict:
         },
         "required": ["source", "location", "quote"],
     }
+
+
+def normalize_model_output(data: dict) -> dict:
+    """Normalize harmless model formatting variations before Pydantic validation."""
+    normalized = dict(data)
+    if isinstance(normalized.get("answer"), list):
+        normalized["answer"] = " ".join(str(item) for item in normalized["answer"])
+
+    citations = normalized.get("citations")
+    if isinstance(citations, list):
+        normalized["citations"] = [
+            {
+                "source": item.split(" | ", 1)[0].strip(),
+                "location": item.split(" | ", 1)[1].strip() if " | " in item else "",
+                "quote": "",
+            }
+            if isinstance(item, str)
+            else item
+            for item in citations
+        ]
+    state = normalized.get("state")
+    if isinstance(state, str):
+        normalized["state"] = state.lower()
+
+    detail = normalized.get("contradiction_detail")
+    if isinstance(detail, dict):
+        if isinstance(detail, list) and len(detail) >= 2:
+            detail = {
+                "passage_a": detail[0].get("quote", ""),
+                "source_a": detail[0].get("source", ""),
+                "location_a": detail[0].get("location", ""),
+                "passage_b": detail[1].get("quote", ""),
+                "source_b": detail[1].get("source", ""),
+                "location_b": detail[1].get("location", ""),
+                "conflict_explanation": "The two retrieved passages state incompatible rules for the same situation.",
+            }
+        elif isinstance(detail, dict) and "passage_a" not in detail and (
+            isinstance(detail.get("passage1"), dict)
+            or isinstance(detail.get("passage_1"), str)
+            or isinstance(detail.get("passage_one"), str)
+        ):
+            first = detail.get("passage1", {})
+            second = detail.get("passage2", {})
+            if isinstance(detail.get("passage_one"), str):
+                first = {"quote": detail["passage_one"]}
+                second = {"quote": detail.get("passage_two", "")}
+            elif isinstance(detail.get("passage_1"), str):
+                first = {
+                    "quote": detail["passage_1"],
+                    "source": detail.get("source_1", detail.get("source_a", "")),
+                    "location": detail.get("location_1", detail.get("location_a", "")),
+                }
+                second = {
+                    "quote": detail.get("passage_2", ""),
+                    "source": detail.get("source_2", detail.get("source_b", "")),
+                    "location": detail.get("location_2", detail.get("location_b", "")),
+                }
+            detail = {
+                "passage_a": first.get("quote", first.get("passage", "")),
+                "source_a": first.get("source", ""),
+                "location_a": first.get("location", ""),
+                "passage_b": second.get("quote", second.get("passage", "")),
+                "source_b": second.get("source", ""),
+                "location_b": second.get("location", ""),
+                "conflict_explanation": detail.get("conflict_explanation", detail.get("conflict", "")),
+            }
+        normalized["contradiction_detail"] = detail
+
+    return normalized
     contradiction_detail = {
         "type": "object",
         "additionalProperties": False,
         "properties": {
             "passage_a": {"type": "string"},
             "source_a": {"type": "string"},
+            "location_a": {"type": "string"},
             "passage_b": {"type": "string"},
             "source_b": {"type": "string"},
+            "location_b": {"type": "string"},
             "conflict_explanation": {"type": "string"},
         },
         "required": [
             "passage_a",
             "source_a",
+            "location_a",
             "passage_b",
             "source_b",
+            "location_b",
             "conflict_explanation",
         ],
     }
@@ -316,6 +391,9 @@ CRITICAL RULES:
 - ALWAYS return valid JSON matching the schema.
 - For contradictions, you MUST provide a ContradictionDetail with both passages and conflict explanation.
 - If the context is empty or irrelevant, classify as NEAR_MISS.
+- Use lowercase state values exactly: answerable, near_miss, contradiction.
+- Always include state, confidence_score, answer, citations, contradiction_detail, and contradiction_explanation keys.
+- Keep answers and quotes concise so the complete JSON fits in the response.
 
 When retrieving passages, ALWAYS retrieve at least 6 passages to ensure cross-document contradictions can be detected.
 """
@@ -346,18 +424,12 @@ When retrieving passages, ALWAYS retrieve at least 6 passages to ensure cross-do
                     {"role": "system", "content": self.system_prompt},
                     {"role": "user", "content": f"CONTEXT:\n{formatted_passages}\n\nQUESTION: {question}"}
                 ],
-                response_format={
-                    "type": "json_schema",
-                    "json_schema": {
-                        "name": "StateOutput",
-                        "strict": True,
-                        "schema": groq_state_schema()
-                    }
-                },
-                temperature=0.0
+                response_format={"type": "json_object"},
+                temperature=0.0,
+                max_tokens=900,
             )
             
-            result_json = json.loads(response.choices[0].message.content)
+            result_json = normalize_model_output(json.loads(response.choices[0].message.content))
             result = StateOutput(**result_json)
             
             # Process for contradiction detail extraction

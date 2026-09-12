@@ -36,44 +36,60 @@ export default function ResponseDisplay({ response, onCitationClick }) {
     );
   }
 
-  // Handle contradiction state
-  if (state === 'contradiction') {
-    return (
-      <div className="rounded-xl border-l-4 border-accent-red bg-surface-200 p-5">
-        <StateBadge state={state} />
-        <p className="mt-3 text-sm leading-relaxed">{answer}</p>
-        
-        {/* Show direct contradiction detail if available */}
-        {contradiction_detail && (
-          <div className="mt-4 space-y-3">
-            <p className="text-xs font-medium text-accent-red mb-1">Conflict Details</p>
-            <div className="border-2 border-accent-red/40 rounded-lg p-3 bg-accent-red/5">
-              <p className="text-accent-red font-medium mb-1">Passage A:</p>
-              <p className="text-sm text-zinc-400 mb-1 italic">"{contradiction_detail.passage_a}"</p>
-              <p className="text-xs text-zinc-300 mb-1">({contradiction_detail.source_a})</p>
-            </div>
-            <div className="border-2 border-accent-red/40 rounded-lg p-3 bg-accent-red/5">
-              <p className="text-accent-red font-medium mb-1">Passage B:</p>
-              <p className="text-sm text-zinc-400 mb-1 italic">"{contradiction_detail.passage_b}"</p>
-              <p className="text-xs text-zinc-300 mb-1">({contradiction_detail.source_b})</p>
-            </div>
-            {contradiction_detail.conflict_explanation && (
-              <div className="mt-2 bg-accent-red/10 border border-accent-red/30 rounded-lg p-3">
-                <p className="text-accent-red font-medium mb-1">Why They Conflict:</p>
-                <p className="text-sm">{contradiction_detail.conflict_explanation}</p>
+      // Handle contradiction state
+    if (state === 'contradiction') {
+      return (
+        <div className="rounded-xl border-l-4 border-accent-red bg-surface-200 p-5">
+          <StateBadge state={state} />
+          <p className="mt-3 text-sm leading-relaxed">{answer}</p>
+          
+          {/* Show direct contradiction detail if available */}
+          {contradiction_detail && (
+            <div className="mt-4 space-y-3">
+              <p className="text-xs font-medium text-accent-red mb-1">Conflict Details</p>
+              <div className="border-2 border-accent-red/40 rounded-lg p-3 bg-accent-red/5">
+                <p className="text-accent-red font-medium mb-1">Passage A:</p>
+                <p className="text-sm text-zinc-400 mb-1 italic">"{contradiction_detail.passage_a}"</p>
+                <p className="text-xs text-zinc-300 mb-1">({contradiction_detail.location_a})</p>
               </div>
-            )}
-          </div>
-        )}
-        
-        {/* Fallback show general contradiction explanation */}
-        {contradiction_explanation && !contradiction_detail && (
-          <div className="mt-4 bg-accent-red/10 border border-accent-red/30 rounded-lg p-3">
-            <p className="text-accent-red font-medium mb-1">Conflict Explanation:</p>
-            <p className="text-sm">{contradiction_explanation}</p>
-          </div>
-          )
-        }
+              <div className="border-2 border-accent-red/40 rounded-lg p-3 bg-accent-red/5">
+                <p className="text-accent-red font-medium mb-1">Passage B:</p>
+                <p className="text-sm text-zinc-400 mb-1 italic">"{contradiction_detail.passage_b}"</p>
+                <p className="text-xs text-zinc-300 mb-1">({contradiction_detail.location_b})</p>
+              </div>
+              {contradiction_detail.conflict_explanation && (
+                <div className="mt-2 bg-accent-red/10 border border-accent-red/30 rounded-lg p-3">
+                  <p className="text-accent-red font-medium mb-1">Why They Conflict:</p>
+                  <p className="text-sm">{contradiction_detail.conflict_explanation}</p>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Fallback show general contradiction explanation */}
+          {contradiction_explanation && !contradiction_detail && (
+            <div className="mt-4 bg-accent-red/10 border border-accent-red/30 rounded-lg p-3">
+              <p className="text-accent-red font-medium mb-1">Conflict Explanation:</p>
+              <p className="text-sm">{contradiction_explanation}</p>
+            </div>
+          )}
+          
+          {/* Highlight the conflicting passages visually */}
+          {contradiction_detail && (
+            <div className="mt-6 border-t-2 border-accent-red border-surface-400 p-2">
+              <p className="text-xs text-accent-red uppercase tracking-wider">IDENTIFIED CONTRADICTION</p>
+              <p className="text-sm leading-relaxed">
+                {contradiction_detail.passage_a}<br />
+                <em>({contradiction_detail.location_a})</em><br />
+                <br />
+                {contradiction_detail.passage_b}<br />
+                <em>({contradiction_detail.location_b})</em>
+              </p>
+            </div>
+          )}
+        </div>
+      );
+    }
         
         {/* Highlight the conflicting passages visually */}
         {contradiction_detail && (

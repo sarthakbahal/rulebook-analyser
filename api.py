@@ -142,7 +142,14 @@ async def eval_endpoint(force: bool = False):
         with open(out_path, encoding="utf-8") as f:
             cached = json.load(f)
         cached_metrics = cached.get("metrics", {})
-        if cached_metrics.get("overall", {}).get("total") == len(test_data["questions"]):
+        has_engine_errors = any(
+            str(result.get("answer", "")).startswith("Error processing query:")
+            for result in cached.get("results", [])
+        )
+        if (
+            cached_metrics.get("overall", {}).get("total") == len(test_data["questions"])
+            and not has_engine_errors
+        ):
             return cached
 
     if engine is None:
