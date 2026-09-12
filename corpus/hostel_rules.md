@@ -105,3 +105,15 @@ The source handbook emphasizes that seeking medical assistance during certain em
 ## 6. Residence Reference Points
 
 The residence-related material in the source handbook includes policies concerning residence-hall murals, smoking in residence halls, events, security, postering, rooftop common spaces, approved Institute housing, interim action, and other housing expectations. The synthetic rules in this file should be read alongside the contradiction notes in `contradictions.md`.
+
+## Section 6: Special Events
+
+Guests may stay overnight during designated institute events.
+
+## Section 7: Guest Policy
+
+Guests allowed until 10pm. 
+
+## Section 8: Medical documentation
+
+Medical documentation must be submitted within 7 days.

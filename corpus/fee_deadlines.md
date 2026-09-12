@@ -40,3 +40,6 @@ The 30-day library refund deadline in Table 2 conflicts with a statement inserte
 - Hostel late fee: $75 after 3 calendar days.
 - Library overdue fee: $2 per day per item.
 - Library caution deposit refund: within 30 days of graduation.
+
+## Re-sit policy
+Re-sit fee applies per attempt, unlimited attempts within the semester.

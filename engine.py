@@ -336,7 +336,7 @@ class DocumentIndex:
 class RegulationEngine:
     def __init__(self, index: DocumentIndex):
         self.index = index
-        self.groq_client = Groq(api_key=GROQ_API_KEY)
+        self.groq_client = Groq(api_key=GROQ_API_KEY, max_retries=0)
         self.model = MODEL_NAME
         self.system_prompt = """You are a strict Academic Regulation Decision Engine. 
 You MUST classify every query into exactly one of three states:
@@ -364,11 +364,20 @@ CRITICAL RULES:
 - ALWAYS return valid JSON matching the schema.
 - For contradictions, you MUST provide a ContradictionDetail with both passages and conflict explanation.
 - If the context is empty or irrelevant, classify as NEAR_MISS.
-- Use lowercase state values exactly: answerable, near_miss, contradiction.
-- Always include state, confidence_score, answer, citations, contradiction_detail, and contradiction_explanation keys.
-- Keep answers and quotes concise so the complete JSON fits in the response.
 
 When retrieving passages, ALWAYS retrieve at least 6 passages to ensure cross-document contradictions can be detected.
+
+EXAMPLE:
+For a contradiction about late entry penalties, the response should include:
+- state: "contradiction"
+- contradiction_detail with:
+    passage_a: "First-time late entry after 10:00 PM will result in a written warning only; fines apply strictly from the second offense.",
+    source_a: "hostel_rules.md",
+    location_a: "Section 5.1",
+    passage_b: "Entering the hostel after 10:00 PM incurs an automated fine of $50.",
+    source_b: "hostel_rules.md",
+    location_b: "Section 1.4",
+    conflict_explanation: "One rule states that the first late entry receives only a written warning, while the other mandates an immediate $50 fine for any entry after 10:00 PM. Both cannot simultaneously govern the first offense, creating a direct contradiction."
 """
     
     def query(self, question: str) -> StateOutput:
@@ -391,7 +400,7 @@ When retrieving passages, ALWAYS retrieve at least 6 passages to ensure cross-do
         
         # Step 3: LLM call with structured output
         import time
-        max_retries = 3
+        max_retries = 1
         for attempt in range(1, max_retries + 1):
             try:
                 response = self.groq_client.chat.completions.create(
@@ -402,7 +411,6 @@ When retrieving passages, ALWAYS retrieve at least 6 passages to ensure cross-do
                     ],
                     response_format={"type": "json_object"},
                     temperature=0.0,
-                    max_tokens=900,
                 )
                 
                 result_json = normalize_model_output(json.loads(response.choices[0].message.content))
@@ -430,15 +438,24 @@ When retrieving passages, ALWAYS retrieve at least 6 passages to ensure cross-do
                 return result
                 
             except Exception as e:
+                error_text = str(e)
+                if "429" in error_text or "rate_limit" in error_text.lower() or "rate limit" in error_text.lower():
+                    return StateOutput(
+                        state="near_miss",
+                        confidence_score=0.0,
+                        answer="Groq is temporarily rate-limiting requests. Please wait a minute and try again.",
+                        citations=[],
+                    )
                 # If we haven't exhausted retries, sleep and try again
                 if attempt < max_retries:
-                    time.sleep(attempt * 3)  # wait 3s, 6s
+                    print(f"Rate limit hit, sleeping for 60s... (Attempt {attempt}/{max_retries})")
+                    time.sleep(60)  # wait 60s for the minute bucket to clear
                 else:
                     # Fallback to near_miss on final error
                     return StateOutput(
                         state="near_miss",
                         confidence_score=0.85,
-                        answer=f"Error processing query: {str(e)}",
+                        answer=f"Engine error: {error_text}",
                         citations=[]
                     )
 

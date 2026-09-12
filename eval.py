@@ -15,7 +15,10 @@ Output:
 
 import json
 import logging
+import socket
 import time
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -57,12 +60,25 @@ def run_evaluation(
                   f"[yellow]{counts['near_miss']} near-miss[/yellow] · "
                   f"[red]{counts['contradiction']} contradiction[/red]\n")
 
-    # ── Initialize pipeline & engine ──────────────────────────────
-    console.print("[dim]Initialising ingestion pipeline…[/dim]")
-    pipeline = IngestionPipeline(pdf_path=pdf_path, md_files=md_files)
-    pipeline.build_index()
-    engine = RegulationEngine(pipeline)
-    console.print("[dim]Engine ready.\n[/dim]")
+    # Use the running API when available so CLI evaluation does not open
+    # the same local Qdrant storage as the server.
+    api_base = "http://127.0.0.1:8000"
+    use_api = False
+    try:
+        with socket.create_connection(("127.0.0.1", 8000), timeout=1):
+            use_api = True
+    except OSError:
+        pass
+
+    engine = None
+    if use_api:
+        console.print("[dim]Using running API engine.\n[/dim]")
+    else:
+        console.print("[dim]Initialising ingestion pipeline…[/dim]")
+        pipeline = IngestionPipeline(pdf_path=pdf_path, md_files=md_files)
+        pipeline.build_index()
+        engine = RegulationEngine(pipeline)
+        console.print("[dim]Engine ready.\n[/dim]")
 
     # ── Run evaluation ─────────────────────────────────────────────
     metrics: dict[str, dict] = {
@@ -83,8 +99,25 @@ def run_evaluation(
         task = progress.add_task("Running queries…", total=len(questions))
 
         for q in questions:
-            predicted = engine.query(q["question"])
-            match = predicted.state == q["type"]
+            if use_api:
+                request = urllib.request.Request(
+                    f"{api_base}/api/query",
+                    data=json.dumps({"question": q["question"]}).encode("utf-8"),
+                    headers={"Content-Type": "application/json"},
+                    method="POST",
+                )
+                with urllib.request.urlopen(request, timeout=120) as response:
+                    predicted = json.loads(response.read().decode("utf-8"))
+                predicted_state = predicted["state"]
+                predicted_answer = predicted.get("answer")
+                confidence = predicted.get("confidence_score", 0.0)
+            else:
+                predicted = engine.query(q["question"])
+                predicted_state = predicted.state
+                predicted_answer = predicted.answer
+                confidence = predicted.confidence_score
+
+            match = predicted_state == q["type"]
 
             if match:
                 metrics["overall"]["correct"] += 1
@@ -95,14 +128,14 @@ def run_evaluation(
                     "id": q["id"],
                     "type": q["type"],
                     "question": q["question"],
-                    "predicted_state": predicted.state,
+                    "predicted_state": predicted_state,
                     "match": match,
-                    "answer": predicted.answer,
-                    "confidence": predicted.confidence_score,
+                    "answer": predicted_answer,
+                    "confidence": confidence,
                 }
             )
             progress.advance(task)
-            time.sleep(2.0)  # keep the request rate below Groq TPM limits
+            time.sleep(8.0)  # keep the request rate well below Groq TPM/RPM limits
 
     # ── Print results table ────────────────────────────────────────
     table = Table(
