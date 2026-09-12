@@ -24,7 +24,7 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-import fitz                    # PyMuPDF
+import pymupdf
 import joblib
 from rank_bm25 import BM25Okapi
 from qdrant_client import QdrantClient, models
@@ -221,7 +221,7 @@ class IngestionPipeline:
         add chunks to self.all_texts / self.all_metadatas.
         Returns full concatenated raw text.
         """
-        doc = fitz.open(pdf_path)
+        doc = pymupdf.open(pdf_path)
         full_text_parts: list[str] = []
         for page_num, page in enumerate(doc, start=1):
             page_text = page.get_text("text").strip()
