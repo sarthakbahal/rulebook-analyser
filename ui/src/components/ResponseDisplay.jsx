@@ -50,12 +50,12 @@ export default function ResponseDisplay({ response, onCitationClick }) {
               <div className="border-2 border-accent-red/40 rounded-lg p-3 bg-accent-red/5">
                 <p className="text-accent-red font-medium mb-1">Passage A:</p>
                 <p className="text-sm text-zinc-400 mb-1 italic">"{contradiction_detail.passage_a}"</p>
-                <p className="text-xs text-zinc-300 mb-1">({contradiction_detail.location_a})</p>
+                <p className="text-xs text-zinc-300 mb-1">({contradiction_detail.source_a} · {contradiction_detail.location_a})</p>
               </div>
               <div className="border-2 border-accent-red/40 rounded-lg p-3 bg-accent-red/5">
                 <p className="text-accent-red font-medium mb-1">Passage B:</p>
                 <p className="text-sm text-zinc-400 mb-1 italic">"{contradiction_detail.passage_b}"</p>
-                <p className="text-xs text-zinc-300 mb-1">({contradiction_detail.location_b})</p>
+                <p className="text-xs text-zinc-300 mb-1">({contradiction_detail.source_b} · {contradiction_detail.location_b})</p>
               </div>
               {contradiction_detail.conflict_explanation && (
                 <div className="mt-2 bg-accent-red/10 border border-accent-red/30 rounded-lg p-3">
@@ -80,33 +80,16 @@ export default function ResponseDisplay({ response, onCitationClick }) {
               <p className="text-xs text-accent-red uppercase tracking-wider">IDENTIFIED CONTRADICTION</p>
               <p className="text-sm leading-relaxed">
                 {contradiction_detail.passage_a}<br />
-                <em>({contradiction_detail.location_a})</em><br />
+                <em>({contradiction_detail.source_a} · {contradiction_detail.location_a})</em><br />
                 <br />
                 {contradiction_detail.passage_b}<br />
-                <em>({contradiction_detail.location_b})</em>
+                <em>({contradiction_detail.source_b} · {contradiction_detail.location_b})</em>
               </p>
             </div>
           )}
         </div>
       );
     }
-        
-        {/* Highlight the conflicting passages visually */}
-        {contradiction_detail && (
-          <div className="mt-6 border-t-2 border-accent-red border-surface-400 p-2">
-            <p className="text-xs text-accent-red uppercase tracking-wider">IDENTIFIED CONTRADICTION</p>
-            <p className="text-sm leading-relaxed">
-              {contradiction_detail.passage_a}<br />
-              <em>({contradiction_detail.source_a})</em><br />
-              <br />
-              {contradiction_detail.passage_b}<br />
-              <em>({contradiction_detail.source_b})</em>
-            </p>
-          </div>
-        )}
-      </div>
-    );
-  }
 
   return null;
 }

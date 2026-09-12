@@ -18,7 +18,7 @@ load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 QDRANT_URL = os.getenv("QDRANT_URL", "localhost:6333")
 QDRANT_API_KEY = os.getenv("QDRANT_API_KEY", "")
-MODEL_NAME = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
+MODEL_NAME = os.getenv("GROQ_MODEL", "qwen/qwen3.8-27b")
 
 # ======================
 # PYDANTIC SCHEMAS
@@ -30,13 +30,13 @@ class Citation(BaseModel):
     quote: str = Field(description="Verbatim text quote from the passage")
 
 class ContradictionDetail(BaseModel):
-    passage_a: str = Field(description="verbatim quote from first conflicting source")
-    source_a: str = Field(description="file name of first passage, e.g., academic_handbook.pdf")
-    location_a: str = Field(description="location within source, e.g., Page 4 or Section 3.2")
-    passage_b: str = Field(description="verbatim quote from second conflicting source")
-    source_b: str = Field(description="file name of second passage, e.g., academic_handbook.pdf")
-    location_b: str = Field(description="location within source, e.g., Page 18 or Section 1.4")
-    conflict_explanation: str = Field(description="one-sentence explanation why following both is impossible")
+    passage_a: str = Field(default="", description="verbatim quote from first conflicting source")
+    source_a: str = Field(default="", description="file name of first passage, e.g., academic_handbook.pdf")
+    location_a: str = Field(default="", description="location within source, e.g., Page 4 or Section 3.2")
+    passage_b: str = Field(default="", description="verbatim quote from second conflicting source")
+    source_b: str = Field(default="", description="file name of second passage, e.g., academic_handbook.pdf")
+    location_b: str = Field(default="", description="location within source, e.g., Page 18 or Section 1.4")
+    conflict_explanation: str = Field(default="", description="one-sentence explanation why following both is impossible")
 
 class StateOutput(BaseModel):
     state: Literal["answerable", "near_miss", "contradiction"]
@@ -53,19 +53,34 @@ class StateOutput(BaseModel):
 def groq_state_schema() -> dict:
     """Return a strict schema accepted by Groq's JSON-schema response mode."""
     citation = {
-        "type": "object",
-        "additionalProperties": False,
-        "properties": {
-            "source": {"type": "string"},
-            "location": {"type": "string"},
-            "quote": {"type": "string"},
-        },
+        "type": "object", "additionalProperties": False,
+        "properties": {"source": {"type": "string"}, "location": {"type": "string"}, "quote": {"type": "string"}},
         "required": ["source", "location", "quote"],
+    }
+    detail = {
+        "type": "object", "additionalProperties": False,
+        "properties": {
+            "passage_a": {"type": "string"}, "source_a": {"type": "string"}, "location_a": {"type": "string"},
+            "passage_b": {"type": "string"}, "source_b": {"type": "string"}, "location_b": {"type": "string"},
+            "conflict_explanation": {"type": "string"},
+        },
+        "required": ["passage_a", "source_a", "location_a", "passage_b", "source_b", "location_b", "conflict_explanation"],
+    }
+    return {
+        "type": "object", "additionalProperties": False,
+        "properties": {
+            "state": {"type": "string", "enum": ["answerable", "near_miss", "contradiction"]},
+            "confidence_score": {"type": "number"}, "answer": {"type": ["string", "null"]},
+            "citations": {"type": "array", "items": citation},
+            "contradiction_detail": {"anyOf": [detail, {"type": "null"}]},
+            "contradiction_explanation": {"type": ["string", "null"]},
+        },
+        "required": ["state", "confidence_score", "answer", "citations", "contradiction_detail", "contradiction_explanation"],
     }
 
 
 def normalize_model_output(data: dict) -> dict:
-    """Normalize harmless model formatting variations before Pydantic validation."""
+    """Normalize model output variants before Pydantic validation."""
     normalized = dict(data)
     if isinstance(normalized.get("answer"), list):
         normalized["answer"] = " ".join(str(item) for item in normalized["answer"])
@@ -87,92 +102,50 @@ def normalize_model_output(data: dict) -> dict:
         normalized["state"] = state.lower()
 
     detail = normalized.get("contradiction_detail")
-    if isinstance(detail, dict):
-        if isinstance(detail, list) and len(detail) >= 2:
-            detail = {
-                "passage_a": detail[0].get("quote", ""),
-                "source_a": detail[0].get("source", ""),
-                "location_a": detail[0].get("location", ""),
-                "passage_b": detail[1].get("quote", ""),
-                "source_b": detail[1].get("source", ""),
-                "location_b": detail[1].get("location", ""),
-                "conflict_explanation": "The two retrieved passages state incompatible rules for the same situation.",
-            }
-        elif isinstance(detail, dict) and "passage_a" not in detail and (
-            isinstance(detail.get("passage1"), dict)
-            or isinstance(detail.get("passage_1"), str)
-            or isinstance(detail.get("passage_one"), str)
-        ):
-            first = detail.get("passage1", {})
-            second = detail.get("passage2", {})
-            if isinstance(detail.get("passage_one"), str):
-                first = {"quote": detail["passage_one"]}
-                second = {"quote": detail.get("passage_two", "")}
-            elif isinstance(detail.get("passage_1"), str):
-                first = {
-                    "quote": detail["passage_1"],
-                    "source": detail.get("source_1", detail.get("source_a", "")),
-                    "location": detail.get("location_1", detail.get("location_a", "")),
-                }
-                second = {
-                    "quote": detail.get("passage_2", ""),
-                    "source": detail.get("source_2", detail.get("source_b", "")),
-                    "location": detail.get("location_2", detail.get("location_b", "")),
-                }
+    if isinstance(detail, list) and len(detail) >= 2:
+        first, second = detail[0], detail[1]
+        detail = {
+            "passage_a": first.get("quote", first.get("passage", "")),
+            "source_a": first.get("source", ""),
+            "location_a": first.get("location", ""),
+            "passage_b": second.get("quote", second.get("passage", "")),
+            "source_b": second.get("source", ""),
+            "location_b": second.get("location", ""),
+            "conflict_explanation": "The two retrieved passages state incompatible rules for the same situation.",
+        }
+    elif isinstance(detail, dict) and "passage_a" not in detail:
+        first = detail.get("passage1", detail.get("passage_1", detail.get("passage_one", {})))
+        second = detail.get("passage2", detail.get("passage_2", detail.get("passage_two", {})))
+        if isinstance(first, str):
+            first = {"quote": first}
+        if isinstance(second, str):
+            second = {"quote": second}
+        if isinstance(first, dict) and isinstance(second, dict):
             detail = {
                 "passage_a": first.get("quote", first.get("passage", "")),
-                "source_a": first.get("source", ""),
-                "location_a": first.get("location", ""),
+                "source_a": first.get("source", detail.get("source_a", detail.get("source_1", ""))),
+                "location_a": first.get("location", detail.get("location_a", detail.get("location_1", ""))),
                 "passage_b": second.get("quote", second.get("passage", "")),
-                "source_b": second.get("source", ""),
-                "location_b": second.get("location", ""),
+                "source_b": second.get("source", detail.get("source_b", detail.get("source_2", ""))),
+                "location_b": second.get("location", detail.get("location_b", detail.get("location_2", ""))),
                 "conflict_explanation": detail.get("conflict_explanation", detail.get("conflict", "")),
             }
+    if isinstance(detail, dict):
+        citations = normalized.get("citations", [])
+        if citations:
+            first = citations[0]
+            second = citations[1] if len(citations) > 1 else {}
+            detail["passage_a"] = detail.get("passage_a") or first.get("quote", "")
+            detail["source_a"] = detail.get("source_a") or first.get("source", "")
+            detail["location_a"] = detail.get("location_a") or first.get("location", "")
+            detail["passage_b"] = detail.get("passage_b") or second.get("quote", "")
+            detail["source_b"] = detail.get("source_b") or second.get("source", "")
+            detail["location_b"] = detail.get("location_b") or second.get("location", "")
+        detail["conflict_explanation"] = detail.get("conflict_explanation") or normalized.get("contradiction_explanation", "")
+    if detail is not None:
         normalized["contradiction_detail"] = detail
 
     return normalized
-    contradiction_detail = {
-        "type": "object",
-        "additionalProperties": False,
-        "properties": {
-            "passage_a": {"type": "string"},
-            "source_a": {"type": "string"},
-            "location_a": {"type": "string"},
-            "passage_b": {"type": "string"},
-            "source_b": {"type": "string"},
-            "location_b": {"type": "string"},
-            "conflict_explanation": {"type": "string"},
-        },
-        "required": [
-            "passage_a",
-            "source_a",
-            "location_a",
-            "passage_b",
-            "source_b",
-            "location_b",
-            "conflict_explanation",
-        ],
-    }
-    return {
-        "type": "object",
-        "additionalProperties": False,
-        "properties": {
-            "state": {"type": "string", "enum": ["answerable", "near_miss", "contradiction"]},
-            "confidence_score": {"type": "number"},
-            "answer": {"type": ["string", "null"]},
-            "citations": {"type": "array", "items": citation},
-            "contradiction_detail": {"anyOf": [contradiction_detail, {"type": "null"}]},
-            "contradiction_explanation": {"type": ["string", "null"]},
-        },
-        "required": [
-            "state",
-            "confidence_score",
-            "answer",
-            "citations",
-            "contradiction_detail",
-            "contradiction_explanation",
-        ],
-    }
 
 def rrf_fusion(
     bm25_ranks: List[int],
@@ -417,50 +390,57 @@ When retrieving passages, ALWAYS retrieve at least 6 passages to ensure cross-do
         ])
         
         # Step 3: LLM call with structured output
-        try:
-            response = self.groq_client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": self.system_prompt},
-                    {"role": "user", "content": f"CONTEXT:\n{formatted_passages}\n\nQUESTION: {question}"}
-                ],
-                response_format={"type": "json_object"},
-                temperature=0.0,
-                max_tokens=900,
-            )
-            
-            result_json = normalize_model_output(json.loads(response.choices[0].message.content))
-            result = StateOutput(**result_json)
-            
-            # Process for contradiction detail extraction
-            if (
-                result.state == "contradiction" 
-                and result.contradiction_detail is None 
-                and result.citations and len(result.citations) >= 2
-            ):
-                # Try to extract conflict info from citations if not provided
-                cite1, cite2 = result.citations[0], result.citations[1]
-                conflict_explanation = f"Rules conflict: '{cite1.quote[:50]}...' vs '{cite2.quote[:50]}...'"
-                
-                # Create detailed contradiction information
-                result.contradiction_detail = ContradictionDetail(
-                    passage_a=cite1.quote,
-                    source_a=f"{cite1.source} ({cite1.location})",
-                    passage_b=cite2.quote,
-                    source_b=f"{cite2.source} ({cite2.location})",
-                    conflict_explanation=conflict_explanation
+        import time
+        max_retries = 3
+        for attempt in range(1, max_retries + 1):
+            try:
+                response = self.groq_client.chat.completions.create(
+                    model=self.model,
+                    messages=[
+                        {"role": "system", "content": self.system_prompt},
+                        {"role": "user", "content": f"CONTEXT:\n{formatted_passages}\n\nQUESTION: {question}"}
+                    ],
+                    response_format={"type": "json_object"},
+                    temperature=0.0,
+                    max_tokens=900,
                 )
-            
-            return result
-            
-        except Exception as e:
-            # Fallback to near_miss on any error
-            return StateOutput(
-                state="near_miss",
-                confidence_score=0.85,
-                answer=f"Error processing query: {str(e)}",
-                citations=[]
-            )
+                
+                result_json = normalize_model_output(json.loads(response.choices[0].message.content))
+                result = StateOutput(**result_json)
+                
+                # Process for contradiction detail extraction
+                if (
+                    result.state == "contradiction" 
+                    and result.contradiction_detail is None 
+                    and result.citations and len(result.citations) >= 2
+                ):
+                    # Try to extract conflict info from citations if not provided
+                    cite1, cite2 = result.citations[0], result.citations[1]
+                    conflict_explanation = f"Rules conflict: '{cite1.quote[:50]}...' vs '{cite2.quote[:50]}...'"
+                    
+                    # Create detailed contradiction information
+                    result.contradiction_detail = ContradictionDetail(
+                        passage_a=cite1.quote,
+                        source_a=f"{cite1.source} ({cite1.location})",
+                        passage_b=cite2.quote,
+                        source_b=f"{cite2.source} ({cite2.location})",
+                        conflict_explanation=conflict_explanation
+                    )
+                
+                return result
+                
+            except Exception as e:
+                # If we haven't exhausted retries, sleep and try again
+                if attempt < max_retries:
+                    time.sleep(attempt * 3)  # wait 3s, 6s
+                else:
+                    # Fallback to near_miss on final error
+                    return StateOutput(
+                        state="near_miss",
+                        confidence_score=0.85,
+                        answer=f"Error processing query: {str(e)}",
+                        citations=[]
+                    )
 
 # ======================
 # QUICK START FUNCTION
