@@ -125,11 +125,16 @@ async def query_endpoint(request: QueryRequest):
 
 
 @app.get("/api/eval")
-async def eval_endpoint():
+async def eval_endpoint(force: bool = False):
     """
     Run the full 43-question benchmark and return accuracy metrics.
     This can take several minutes — do not time out your HTTP client.
     """
+    out_path = Path("eval_results.json")
+    if not force and out_path.exists():
+        with open(out_path, encoding="utf-8") as f:
+            return json.load(f)
+
     if engine is None:
         raise HTTPException(status_code=503, detail="Engine not yet initialised.")
 
@@ -175,7 +180,6 @@ async def eval_endpoint():
     output = {"metrics": metrics, "results": results}
 
     # Cache result to disk
-    out_path = Path("eval_results.json")
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(output, f, indent=2)
 

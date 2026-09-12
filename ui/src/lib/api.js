@@ -23,8 +23,8 @@ export async function queryEngine(question) {
  * Runs the 43-question benchmark — can take several minutes.
  * @returns {Promise<{metrics: Object, results: Array}>}
  */
-export async function runEval() {
-  const res = await fetch(`${API_BASE}/eval`, {
+export async function runEval({ force = false } = {}) {
+  const res = await fetch(`${API_BASE}/eval${force ? '?force=true' : ''}`, {
     // Long timeout for eval — do NOT abort early
     signal: AbortSignal.timeout(600_000), // 10 min
   })
